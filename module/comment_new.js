@@ -3,6 +3,7 @@ const { resourceTypeMap } = require('../util/config.json')
 
 module.exports = (query, request) => {
   query.cookie.os = 'pc'
+  query.cookie.appver = '2.9.7'
   query.type = resourceTypeMap[query.type]
   const threadId = query.type + query.id
   const pageSize = query.pageSize || 20
@@ -40,6 +41,7 @@ module.exports = (query, request) => {
     {
       crypto: 'eapi',
       cookie: query.cookie,
+      ua: query.ua || '',
       proxy: query.proxy,
       realIP: query.realIP,
       url: '/api/v2/resource/comments',

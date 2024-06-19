@@ -1,4 +1,4 @@
-// 初始化名字
+// 歌单动态信息
 
 module.exports = (query, request) => {
   const data = {
@@ -13,6 +13,7 @@ module.exports = (query, request) => {
     {
       crypto: 'api',
       cookie: query.cookie,
+      ua: query.ua || '',
       proxy: query.proxy,
       realIP: query.realIP,
     },

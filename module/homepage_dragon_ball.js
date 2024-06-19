@@ -4,8 +4,7 @@
 // !需要登录或者游客登录，非登录返回 []
 module.exports = (query, request) => {
   const data = {}
-  query.cookie.os = 'ios'
-  query.cookie.appver = '8.20.21'
+
   return request(
     'POST',
     `https://music.163.com/eapi/homepage/dragon/ball/static`,
@@ -13,6 +12,7 @@ module.exports = (query, request) => {
     {
       crypto: 'eapi',
       cookie: query.cookie,
+      ua: query.ua || '',
       proxy: query.proxy,
       url: '/api/homepage/dragon/ball/static',
       realIP: query.realIP,

@@ -3,9 +3,15 @@ const uploadPlugin = require('../plugins/songUpload')
 const md5 = require('md5')
 module.exports = async (query, request) => {
   let ext = 'mp3'
-  if (query.songFile.name.indexOf('flac') > -1) {
-    ext = 'flac'
+  // if (query.songFile.name.indexOf('flac') > -1) {
+  //   ext = 'flac'
+  // }
+  if (query.songFile.name.includes('.')) {
+    ext = query.songFile.name.split('.').pop()
   }
+  query.songFile.name = Buffer.from(query.songFile.name, 'latin1').toString(
+    'utf-8',
+  )
   const filename = query.songFile.name
     .replace('.' + ext, '')
     .replace(/\s/g, '')
@@ -41,6 +47,7 @@ module.exports = async (query, request) => {
     {
       crypto: 'weapi',
       cookie: query.cookie,
+      ua: query.ua || '',
       proxy: query.proxy,
       realIP: query.realIP,
     },
@@ -103,7 +110,12 @@ module.exports = async (query, request) => {
       type: 'audio',
       md5: query.songFile.md5,
     },
-    { crypto: 'weapi', cookie: query.cookie, proxy: query.proxy },
+    {
+      crypto: 'weapi',
+      cookie: query.cookie,
+      ua: query.ua || '',
+      proxy: query.proxy,
+    },
   )
 
   if (res.body.needUpload) {
@@ -127,6 +139,7 @@ module.exports = async (query, request) => {
     {
       crypto: 'weapi',
       cookie: query.cookie,
+      ua: query.ua || '',
       proxy: query.proxy,
       realIP: query.realIP,
     },
@@ -142,6 +155,7 @@ module.exports = async (query, request) => {
     {
       crypto: 'weapi',
       cookie: query.cookie,
+      ua: query.ua || '',
       proxy: query.proxy,
       realIP: query.realIP,
     },

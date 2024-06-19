@@ -1,8 +1,11 @@
 const { default: axios } = require('axios')
 module.exports = async (query, request) => {
   let ext = 'mp3'
-  if (query.songFile.name.indexOf('flac') > -1) {
-    ext = 'flac'
+  // if (query.songFile.name.indexOf('flac') > -1) {
+  //   ext = 'flac'
+  // }
+  if (query.songFile.name.includes('.')) {
+    ext = query.songFile.name.split('.').pop()
   }
   const filename = query.songFile.name
     .replace('.' + ext, '')
@@ -22,7 +25,12 @@ module.exports = async (query, request) => {
       type: 'audio',
       md5: query.songFile.md5,
     },
-    { crypto: 'weapi', cookie: query.cookie, proxy: query.proxy },
+    {
+      crypto: 'weapi',
+      cookie: query.cookie,
+      ua: query.ua || '',
+      proxy: query.proxy,
+    },
   )
 
   // 上传
@@ -36,7 +44,7 @@ module.exports = async (query, request) => {
     ).data
     await axios({
       method: 'post',
-      url: `http://${lbs.upload[0]}/${bucket}/${objectKey}?offset=0&complete=true&version=1.0`,
+      url: `${lbs.upload[0]}/${bucket}/${objectKey}?offset=0&complete=true&version=1.0`,
       headers: {
         'x-nos-token': tokenRes.body.result.token,
         'Content-MD5': query.songFile.md5,

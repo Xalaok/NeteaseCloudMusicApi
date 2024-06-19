@@ -1,6 +1,4 @@
 module.exports = (query, request) => {
-  query.cookie.os = 'ios'
-  query.cookie.appver = '8.20.21'
   const data = {
     userId: query.uid,
     songId: query.sid,
@@ -13,6 +11,7 @@ module.exports = (query, request) => {
     {
       crypto: 'weapi',
       cookie: query.cookie,
+      ua: query.ua || '',
       proxy: query.proxy,
       realIP: query.realIP,
     },

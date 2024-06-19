@@ -25,8 +25,7 @@ module.exports = async (query, request) => {
       .replace('.' + ext, '')
       .replace(/\s/g, '')
       .replace(/\./g, '_')
-  // query.cookie.os = 'pc'
-  // query.cookie.appver = '2.9.7'
+
   if (!query.songFile) {
     return Promise.reject({
       status: 500,
@@ -48,7 +47,12 @@ module.exports = async (query, request) => {
       nos_product: 0,
       type: 'other',
     },
-    { crypto: 'weapi', cookie: query.cookie, proxy: query.proxy },
+    {
+      crypto: 'weapi',
+      cookie: query.cookie,
+      ua: query.ua || '',
+      proxy: query.proxy,
+    },
   )
 
   const objectKey = tokenRes.body.result.objectKey.replace('/', '%2F')
@@ -65,18 +69,42 @@ module.exports = async (query, request) => {
   // return xml
   const res2 = await parser.parseStringPromise(res.data)
 
-  const res3 = await axios({
-    method: 'put',
-    url: `https://ymusic.nos-hz.163yun.com/${objectKey}?partNumber=1&uploadId=${res2.InitiateMultipartUploadResult.UploadId[0]}`,
-    headers: {
-      'x-nos-token': tokenRes.body.result.token,
-      'Content-Type': 'audio/mpeg',
-    },
-    data: query.songFile.data,
-  })
+  const fileSize = query.songFile.data.length
+  const blockSize = 10 * 1024 * 1024 // 10MB
+  let offset = 0
+  let blockIndex = 1
 
-  // get etag
-  const etag = res3.headers.etag
+  let etags = []
+
+  while (offset < fileSize) {
+    const chunk = query.songFile.data.slice(
+      offset,
+      Math.min(offset + blockSize, fileSize),
+    )
+
+    const res3 = await axios({
+      method: 'put',
+      url: `https://ymusic.nos-hz.163yun.com/${objectKey}?partNumber=${blockIndex}&uploadId=${res2.InitiateMultipartUploadResult.UploadId[0]}`,
+      headers: {
+        'x-nos-token': tokenRes.body.result.token,
+        'Content-Type': 'audio/mpeg',
+      },
+      data: chunk,
+    })
+    // get etag
+    const etag = res3.headers.etag
+    etags.push(etag)
+    offset += blockSize
+    blockIndex++
+  }
+
+  let completeStr = '<CompleteMultipartUpload>'
+  for (let i = 0; i < etags.length; i++) {
+    completeStr += `<Part><PartNumber>${i + 1}</PartNumber><ETag>${
+      etags[i]
+    }</ETag></Part>`
+  }
+  completeStr += '</CompleteMultipartUpload>'
 
   // 文件处理
   await axios({
@@ -87,9 +115,7 @@ module.exports = async (query, request) => {
       'X-Nos-Meta-Content-Type': 'audio/mpeg',
       'x-nos-token': tokenRes.body.result.token,
     },
-    data: `<CompleteMultipartUpload>
-     <Part><PartNumber>1</PartNumber><ETag>${etag}</ETag></Part>
-     </CompleteMultipartUpload>`,
+    data: completeStr,
   })
 
   // preCheck
@@ -121,6 +147,7 @@ module.exports = async (query, request) => {
     {
       crypto: 'weapi',
       cookie: query.cookie,
+      ua: query.ua || '',
       proxy: query.proxy,
       headers: {
         'x-nos-token': tokenRes.body.result.token,
@@ -155,6 +182,7 @@ module.exports = async (query, request) => {
     {
       crypto: 'weapi',
       cookie: query.cookie,
+      ua: query.ua || '',
       proxy: query.proxy,
       headers: {
         'x-nos-token': tokenRes.body.result.token,

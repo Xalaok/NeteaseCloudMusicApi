@@ -271,20 +271,20 @@ export function batch(
 ): Promise<Response>
 
 export function captcha_sent(
-  params: { cellphone: string; ctcode?: number | string } & RequestBaseConfig,
+  params: { phone: string; ctcode?: number | string } & RequestBaseConfig,
 ): Promise<Response>
 
 export function captcha_verify(
   params: {
     ctcode?: number | string
-    cellphone: number | string
+    phone: number | string
     captcha: string
   } & RequestBaseConfig,
 ): Promise<Response>
 
 export function cellphone_existence_check(
   params: {
-    cellphone: number | string
+    phone: number | string
     countrycode: number | string
   } & RequestBaseConfig,
 ): Promise<Response>
@@ -1808,5 +1808,26 @@ export function voicelist_list_search(
     type?: string
     voiceFeeType?: string | number
     radioId?: string
+  } & RequestBaseConfig,
+): Promise<Response>
+
+export function voice_delete(
+  params: {
+    ids: number | string
+  } & RequestBaseConfig,
+): Promise<Response>
+
+export function djRadio_top(
+  params: {
+    djRadioId?: number | string
+    sortIndex?: number | string
+    dataGapDays?: number | string
+    dataType?: number | string
+  } & RequestBaseConfig,
+): Promise<Response>
+
+export function voice_lyric(
+  params: {
+    id: number | string
   } & RequestBaseConfig,
 ): Promise<Response>

@@ -1,11 +1,10 @@
+const CryptoJS = require('crypto-js')
 module.exports = (query, request) => {
   const data = {
     phone: query.phone,
     countrycode: query.countrycode || '86',
     captcha: query.captcha,
-    password: query.password
-      ? crypto.createHash('md5').update(query.password).digest('hex')
-      : '',
+    password: query.password ? CryptoJS.MD5(query.password).toString() : '',
   }
   return request(
     'POST',
@@ -14,6 +13,7 @@ module.exports = (query, request) => {
     {
       crypto: 'weapi',
       cookie: query.cookie,
+      ua: query.ua || '',
       proxy: query.proxy,
       realIP: query.realIP,
     },

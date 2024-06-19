@@ -1,8 +1,6 @@
 // 编辑用户信息
 
 module.exports = (query, request) => {
-  query.cookie.os = 'ios'
-  query.cookie.appver = '8.20.21'
   const data = {
     // avatarImgId: '0',
     birthday: query.birthday,
@@ -19,6 +17,7 @@ module.exports = (query, request) => {
     {
       crypto: 'weapi',
       cookie: query.cookie,
+      ua: query.ua || '',
       proxy: query.proxy,
       realIP: query.realIP,
     },

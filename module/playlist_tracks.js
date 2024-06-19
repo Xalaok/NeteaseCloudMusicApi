@@ -1,7 +1,7 @@
 // 收藏单曲到歌单 从歌单删除歌曲
 
 module.exports = async (query, request) => {
-  // query.cookie.os = 'pc'
+  //
   const tracks = query.tracks.split(',')
   const data = {
     op: query.op, // del,add
@@ -18,6 +18,7 @@ module.exports = async (query, request) => {
       {
         crypto: 'weapi',
         cookie: query.cookie,
+        ua: query.ua || '',
         proxy: query.proxy,
         realIP: query.realIP,
       },
@@ -42,6 +43,7 @@ module.exports = async (query, request) => {
         {
           crypto: 'weapi',
           cookie: query.cookie,
+          ua: query.ua || '',
           proxy: query.proxy,
           realIP: query.realIP,
         },
