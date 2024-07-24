@@ -1,4 +1,20 @@
 # 更新日志
+### 4.22.0 | 2024.07.16
+- 增加部分接口(获取客户端歌曲下载链接 - 新版、当前账号关注的用户/歌手)；eapi返回值加密可被控制，默认不加密；代码优化 [#15](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/15)
+- 增加`会员下载歌曲记录` `会员本月下载歌曲记录` `已购买单曲` 等接口 [#16](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/16)
+- 增加API调试界面 [#16](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/16)
+
+
+### 4.21.2 | 2024.07.09
+- 问题修复 [#14](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/14)
+  
+### 4.21.1 | 2024.06.27
+- 问题修复 [#13](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/13)
+
+### 4.21.0 | 2024.06.26
+- 新增云盘导入歌曲接口 [#11](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/11)
+- 代码优化 [#12](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/12)
+
 ### 4.20.0 | 2024.06.12
 - 一起听从机模式完善 [#8](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/8)
 - 云盘上传后缀名判断完善
