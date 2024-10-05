@@ -304,6 +304,9 @@
 286. 会员下载歌曲记录
 287. 会员本月下载歌曲记录
 288. 已购买单曲
+289. 歌曲是否喜爱
+290. 用户是否互相关注
+291. 歌曲动态封面
 
 ## 安装
 
@@ -374,7 +377,7 @@ v4.0.8 加入了 Vercel 配置文件,可以直接在 Vercel 下部署了,不需�
 
 
 ## 腾讯云 serverless 部署
-因 `Vercel` 在国内访问太慢(不绑定自己的域名的情况下),在此提供腾讯云 serverless 部署方法(注意:腾讯云 serverless 并不是免费的,前三个月有免费额度,之后收费)
+因 `Vercel` 在国内访问太慢(不绑定自己的域名的情况下),在此提供腾讯云 serverless 部署方法
 ### 操作方法
 1. [fork](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/forks/new)  此项目
 2. 在腾讯云serverless应用管理页面( https://console.cloud.tencent.com/sls ),点击`新建应用`
@@ -388,6 +391,9 @@ export PORT=9000
 /var/lang/node16/bin/node app.js
 ``` 
 7. 点击`完成`,等待部署完成,点击`资源列表`的 `API网关` 里的 `URL`,正常情况会打开文档地址,点击文档`例子`可查看接口调用效果
+- 注意
+   - 腾讯云 serverless 并不是免费的,前三个月有免费额度,之后收费
+   - 当前(2024-08-24), 用此法创建的话, 会`默认`关联一个"日志服务-日志主题"(创建过程中没有提醒), 此服务是计量收费的
 
 ## 可以使用代理
 
@@ -568,6 +574,17 @@ v3.30.0 后支持手动传入 cookie,登录接口返回内容新增 `cookie` 字
 {
     ...,
     cookie:"xxx"
+}
+```
+另外的cookie说明:
+可以直接从浏览器中获取cookie值, 只需要其中key为`MUSIC_U`的数据即可
+请求
+```
+GET https://example.com/search?keywords=HELLO&cookie=MUSIC_U%3Dxxxx
+POST https://example.com/search?keywords=HELLO
+body {
+  ...,
+  "cookie": "MUSIC_U=xxxx"
 }
 ```
 
@@ -1502,12 +1519,13 @@ tags: 歌单标签
 
 **必选参数 :** `id` : 音乐 id
  `level`: 播放音质等级, 分为 `standard` => `标准`,`higher` => `较高`, `exhigh`=>`极高`, 
-`lossless`=>`无损`, `hires`=>`Hi-Res`, `jyeffect` => `高清环绕声`, `sky` => `沉浸环绕声`,
-`jymaster` => `超清母带`
+`lossless`=>`无损`, `hires`=>`Hi-Res`, `jyeffect` => `高清环绕声`, `sky` => `沉浸环绕声`, `dolby` => `杜比全景声`, `jymaster` => `超清母带`
 
 **接口地址 :** `/song/url/v1`
 
 **调用例子 :** `/song/url/v1?id=33894312&level=exhigh` `/song/url/v1?id=405998841,33894312&level=lossless`
+
+说明：`杜比全景声`音质需要设备支持，不同的设备可能会返回不同码率的url。cookie需要传入`os=pc`保证返回正常码率的url。
 
 ### 音乐是否可用
 
@@ -2293,7 +2311,9 @@ s_id: u64, 对于t == 2的歌曲，表示匹配到的公开版本歌曲ID
 mark: u64, 一些歌曲属性，用按位与操作获取对应位置的值
   8192 立体声?(不是很确定)
   131072 纯音乐
+  262144 支持 杜比全景声(Dolby Atmos)
   1048576 脏标 🅴
+  17179869184 支持 Hi-Res
   其他未知，理论上有从1到2^63共64种不同的信息
   专辑信息的mark字段也同理
   例子:id 1859245776 和 1859306637 为同一首歌，前者 mark & 1048576 == 1048576,后者 mark & 1048576 == 0，因此前者是脏版。
@@ -4692,16 +4712,15 @@ bitrate = Math.floor(br / 1000)
 
 ### 获取客户端歌曲下载链接 - 新版
 
-说明 : 使用 `/song/url/v1` 接口获取的是歌曲试听 url, 但存在部分歌曲在非 VIP 账号上可以下载无损音质而不能试听无损音质, 使用此接口可使非 VIP 账号获取这些歌曲的无损音频
+说明 : 使用 `/song/url/v1` 接口获取的是歌曲试听 url, 非 VIP 账号最高只能获取 `极高` 音质，但免费类型的歌曲(`fee == 0`)使用本接口可最高获取`Hi-Res`音质的url。
 
 **必选参数 :** `id` : 音乐 id
  `level`: 播放音质等级, 分为 `standard` => `标准`,`higher` => `较高`, `exhigh`=>`极高`, 
-`lossless`=>`无损`, `hires`=>`Hi-Res`, `jyeffect` => `高清环绕声`, `sky` => `沉浸环绕声`,
-`jymaster` => `超清母带`
+`lossless`=>`无损`, `hires`=>`Hi-Res`, `jyeffect` => `高清环绕声`, `sky` => `沉浸环绕声`, `dolby` => `杜比全景声`, `jymaster` => `超清母带`
 
 **接口地址 :** `/song/download/url/v1`
 
-**调用例子 :** `/song/download/url/v1?id=2058263032&level=lossless`
+**调用例子 :** `/song/download/url/v1?id=2155423468&level=hires`
 
 ### 当前账号关注的用户/歌手
 
@@ -4758,6 +4777,44 @@ bitrate = Math.floor(br / 1000)
 **接口地址 :** `/song/singledownlist`
 
 **调用例子 :** `/song/singledownlist`
+
+### 歌曲是否喜爱
+
+说明 : 登录后调用此接口, 传入歌曲id, 可判断歌曲是否被喜爱;
+
+若传入一个包含多个歌曲ID的数组, 则接口将返回一个由这些ID中被标记为喜爱的歌曲组成的数组
+
+**必选参数 :**  
+
+`ids`: 歌曲 id 列表
+
+**接口地址 :** `/song/like/check`
+
+**调用例子 :** `/song/like/check?ids=[2058263032,1497529942]`
+
+### 用户是否互相关注
+
+说明 : 登录后调用此接口, 传入用户id, 可判断用户是否互相关注
+
+**必选参数 :**  
+
+`uid`: 用户 id
+
+**接口地址 :** `/user/mutualfollow/get`
+
+**调用例子 :** `/user/mutualfollow/get?uid=32953014`
+
+### 歌曲动态封面
+
+说明 : 调用此接口, 传入歌曲id, 获取歌曲动态封面
+
+**必选参数 :**  
+
+`id`: 歌曲 id
+
+**接口地址 :** `/song/dynamic/cover`
+
+**调用例子 :** `/song/dynamic/cover?id=2101179024`
 
 ## 离线访问此文档
 

@@ -8,7 +8,7 @@ const tunnel = require('tunnel')
 const fs = require('fs')
 const path = require('path')
 const tmpPath = require('os').tmpdir()
-const { cookieToJson, cookieObjToString } = require('./index')
+const { cookieToJson, cookieObjToString, toBoolean } = require('./index')
 const anonymous_token = fs.readFileSync(
   path.resolve(tmpPath, './anonymous_token'),
   'utf-8',
@@ -29,21 +29,11 @@ const chooseUserAgent = (uaType) => {
   }
   return userAgentMap.pc
 }
-const createRequest = (method, uri, data = {}, options) => {
+const createRequest = (uri, data, options) => {
   const cookie = options.cookie || {}
   return new Promise((resolve, reject) => {
-    let headers = {
-      'User-Agent': options.ua || chooseUserAgent(options.uaType),
-      os: cookie.os || 'ios',
-      appver: cookie.appver || (cookie.os != 'pc' ? iosAppVersion : ''),
-    }
     options.headers = options.headers || {}
-    headers = {
-      ...headers,
-      ...options.headers,
-    }
-    if (method.toUpperCase() === 'POST')
-      headers['Content-Type'] = 'application/x-www-form-urlencoded'
+    let headers = options.headers
     let ip = options.realIP || options.ip || ''
     // console.log(ip)
     if (ip) {
@@ -57,9 +47,6 @@ const createRequest = (method, uri, data = {}, options) => {
         __remember_me: true,
         // NMTID: CryptoJS.lib.WordArray.random(16).toString(),
         _ntes_nuid: CryptoJS.lib.WordArray.random(16).toString(),
-        os: options.cookie.os || 'ios',
-        appver:
-          options.cookie.appver || (cookie.os != 'pc' ? iosAppVersion : ''),
       }
       if (uri.indexOf('login') === -1) {
         options.cookie['NMTID'] = CryptoJS.lib.WordArray.random(16).toString()
@@ -73,14 +60,9 @@ const createRequest = (method, uri, data = {}, options) => {
       headers['Cookie'] = cookieObjToString(options.cookie)
     } else if (options.cookie) {
       // cookie string
-      const cookie = cookieToJson(options.cookie)
-      cookie.os = cookie.os || 'ios'
-      cookie.appver = cookie.appver || (cookie.os != 'pc' ? iosAppVersion : '')
-      headers['Cookie'] = cookieObjToString(cookie)
+      headers['Cookie'] = options.cookie
     } else {
       const cookie = cookieToJson('__remember_me=true; NMTID=xxx')
-      cookie.os = cookie.os || 'ios'
-      cookie.appver = cookie.appver || (cookie.os != 'pc' ? iosAppVersion : '')
       headers['Cookie'] = cookieObjToString(cookie)
     }
     // console.log(options.cookie, headers['Cookie'])
@@ -102,7 +84,7 @@ const createRequest = (method, uri, data = {}, options) => {
     // 根据加密方式加密请求数据；目前任意uri都支持四种加密方式
     switch (crypto) {
       case 'weapi':
-        headers['Referer'] = 'https://music.163.com'
+        headers['Referer'] = APP_CONF.domain
         headers['User-Agent'] = options.ua || chooseUserAgent('pc')
         data.csrf_token = csrfToken
         encryptData = encrypt.weapi(data)
@@ -113,7 +95,7 @@ const createRequest = (method, uri, data = {}, options) => {
         headers['User-Agent'] =
           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
         encryptData = encrypt.linuxapi({
-          method: method,
+          method: 'POST',
           url: APP_CONF.apiDomain + uri,
           params: data,
         })
@@ -127,13 +109,13 @@ const createRequest = (method, uri, data = {}, options) => {
         const header = {
           osver: cookie.osver || '17.4.1', //系统版本
           deviceId: cookie.deviceId || global.deviceId,
-          appver: cookie.appver || iosAppVersion, // app版本
+          os: cookie.os || 'ios',
+          appver: cookie.appver || (cookie.os != 'pc' ? iosAppVersion : ''), // app版本
           versioncode: cookie.versioncode || '140', //版本号
           mobilename: cookie.mobilename || '', //设备model
           buildver: cookie.buildver || Date.now().toString().substr(0, 10),
           resolution: cookie.resolution || '1920x1080', //设备分辨率
           __csrf: csrfToken,
-          os: cookie.os || 'ios',
           channel: cookie.channel || '',
           requestId: `${Date.now()}_${Math.floor(Math.random() * 1000)
             .toString()
@@ -147,8 +129,9 @@ const createRequest = (method, uri, data = {}, options) => {
               encodeURIComponent(key) + '=' + encodeURIComponent(header[key]),
           )
           .join('; ')
+        headers['User-Agent'] = options.ua || chooseUserAgent(options.uaType)
 
-        let eapi = () => {
+        if (crypto === 'eapi') {
           // 使用eapi加密
           data.header = header
           data.e_r =
@@ -157,18 +140,13 @@ const createRequest = (method, uri, data = {}, options) => {
               : data.e_r != undefined
               ? data.e_r
               : APP_CONF.encryptResponse // 用于加密接口返回值
+          data.e_r = toBoolean(data.e_r)
           encryptData = encrypt.eapi(uri, data)
           url = APP_CONF.apiDomain + '/eapi/' + uri.substr(5)
-        }
-        let api = () => {
+        } else if (crypto === 'api') {
           // 不使用任何加密
           url = APP_CONF.apiDomain + uri
           encryptData = data
-        }
-        if (crypto === 'eapi') {
-          eapi()
-        } else if (crypto === 'api') {
-          api()
         }
         break
 
@@ -180,7 +158,7 @@ const createRequest = (method, uri, data = {}, options) => {
     const answer = { status: 500, body: {}, cookie: [] }
     // console.log(headers, 'headers')
     let settings = {
-      method: method,
+      method: 'POST',
       url: url,
       headers: headers,
       data: new URLSearchParams(encryptData).toString(),

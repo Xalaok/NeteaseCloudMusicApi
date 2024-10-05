@@ -1,8 +1,9 @@
-// 歌曲简要百科信息
+// 歌曲动态封面
+
 const createOption = require('../util/option.js')
 module.exports = (query, request) => {
   const data = {
     songId: query.id,
   }
-  return request(`/api/rep/ugc/song/get`, data, createOption(query))
+  return request(`/api/songplay/dynamic-cover`, data, createOption(query))
 }
