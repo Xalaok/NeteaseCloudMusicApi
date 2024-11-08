@@ -1,9 +1,10 @@
+// 用户徽章
 const createOption = require('../util/option.js')
 module.exports = (query, request) => {
   return request(
-    `/api/artist/head/info/get`,
+    `/api/medal/user/page`,
     {
-      id: query.id,
+      uid: query.uid,
     },
     createOption(query),
   )

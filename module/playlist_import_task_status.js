@@ -1,9 +1,10 @@
+// 歌单导入 - 任务状态
 const createOption = require('../util/option.js')
 module.exports = (query, request) => {
   return request(
-    `/api/artist/head/info/get`,
+    `/api/playlist/import/task/status/v2`,
     {
-      id: query.id,
+      taskIds: JSON.stringify([query.id]),
     },
     createOption(query),
   )

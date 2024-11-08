@@ -1,4 +1,16 @@
 # 更新日志
+### 4.24.0 | 2024.10.20
+- 新增用户徽章，用户状态，听歌足迹，今日收听，歌单导入等接口 [#29](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/29)
+ 
+### 4.23.3 | 2024.10.15
+- 更正iPhone请求的cookie [#28](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/28)
+
+### 4.23.2 | 2024.10.12
+- cookie参数补充 [#27](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/27)
+
+### 4.23.1 | 2024.10.06
+- 模拟pc客户端的ua和cookie字段 [#26](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/26)
+
 ### 4.23.0 | 2024.10.03
 - 修复登录冻结问题 [#25](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/25)
 - 增加歌曲动态封面接口 [#24](https://gitlab.com/Binaryify/neteasecloudmusicapi/-/merge_requests/24)

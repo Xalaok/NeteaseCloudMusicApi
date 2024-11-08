@@ -1,9 +1,10 @@
+// 用户状态
 const createOption = require('../util/option.js')
 module.exports = (query, request) => {
   return request(
-    `/api/artist/head/info/get`,
+    `/api/social/user/status`,
     {
-      id: query.id,
+      visitorId: query.uid,
     },
     createOption(query),
   )
